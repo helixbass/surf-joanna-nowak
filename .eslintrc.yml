@@ -1,12 +1,37 @@
 extends:
   - react-app
   - prettier
+  - plugin:known-imports/recommended-react
+  - plugin:known-imports/recommended-typescript
 plugins:
   - prettier
   - styles-object
+  - known-imports
 rules:
   prettier/prettier: error
   styles-object/no-unused-styles: error
   styles-object/no-undef-styles: error
+  known-imports/no-unused-vars:
+    - error
+    - args: after-used
+      ignoreRestSiblings: true
+      argsIgnorePattern: '^_'
+  import/order:
+    - error
+    - groups:
+      - [builtin, external]
+      - [internal, parent, sibling, index, unknown]
+      newlines-between: always
 settings:
   styles-object/stylesheet-create-function: makeStyles
+  known-imports/extensions:
+    - .ts
+    - .tsx
+    - .js
+    - .jsx
+  import/extensions:
+    - .ts
+    - .tsx
+    - .js
+    - .jsx
+  import/internal-regex: "^(components|utils|graphql|config)/|^(App|theme|i18n-init)$"

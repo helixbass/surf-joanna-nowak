@@ -2,7 +2,7 @@ import React, {FC} from 'react'
 import {keyframes} from '@emotion/core'
 
 import logo from './logo.svg'
-import {makeStyles} from './utils/style'
+import {makeStyles} from 'utils/style'
 
 const App: FC = () => (
   <div css={styles.app}>
