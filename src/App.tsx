@@ -1,62 +1,36 @@
 import React, {FC} from 'react'
-import {keyframes} from '@emotion/core'
 import {flowMax, addDisplayName} from 'ad-hok'
 
-import logo from './logo.svg'
-import {makeStyles} from 'utils/style'
+import {makeStyles, colors} from 'utils/style'
+
+const CIRCLE_WIDTH = 400
 
 const App: FC = flowMax(addDisplayName('App'), () => (
-  <div css={styles.app}>
-    <header css={styles.appHeader}>
-      <img src={logo} css={styles.appLogo} alt="logo" />
-      <p>
-        Edit <code>src/App.tsx</code> and save to reload.
-      </p>
-      <a
-        css={styles.appLink}
-        href="https://reactjs.org"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn React
-      </a>
-    </header>
+  <div css={styles.container}>
+    <svg
+      height={CIRCLE_WIDTH}
+      width={CIRCLE_WIDTH}
+      viewBox={`0 0 ${CIRCLE_WIDTH} ${CIRCLE_WIDTH}`}
+    >
+      <circle
+        cx={CIRCLE_WIDTH / 2}
+        cy={CIRCLE_WIDTH / 2}
+        r={CIRCLE_WIDTH / 2}
+        fill={colors.white}
+      />
+    </svg>
   </div>
 ))
 
 export default App
 
-const appLogoSpin = keyframes({
-  from: {
-    transform: 'rotate(0deg)',
-  },
-  to: {
-    transform: 'rotate(360deg)',
-  },
-})
-
 const styles = makeStyles({
-  appHeader: {
-    backgroundColor: '#282c34',
-    minHeight: '100vh',
+  container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 'calc(10px + 2vmin)',
-    color: 'white',
-  },
-  appLink: {
-    color: '#61dafb',
-  },
-  app: {
-    textAlign: 'center',
-  },
-  appLogo: {
-    height: '40vmin',
-    pointerEvents: 'none',
-    '@media (prefers-reduced-motion: no-preference)': {
-      animation: `${appLogoSpin} infinite 20s linear`,
-    },
+    backgroundColor: colors.blueBackground,
+    minHeight: '100vh',
   },
 })
