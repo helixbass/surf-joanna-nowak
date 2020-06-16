@@ -3,10 +3,13 @@ extends:
   - prettier
   - plugin:known-imports/recommended-react
   - plugin:known-imports/recommended-typescript
+  - plugin:ad-hok/recommended
 plugins:
   - prettier
   - styles-object
   - known-imports
+  - ad-hok
+  - import
 rules:
   prettier/prettier: error
   styles-object/no-unused-styles: error
@@ -22,6 +25,8 @@ rules:
       - [builtin, external]
       - [internal, parent, sibling, index, unknown]
       newlines-between: always
+  ad-hok/dependencies: error
+  ad-hok/require-adddisplayname: error
 settings:
   styles-object/stylesheet-create-function: makeStyles
   known-imports/extensions:
@@ -35,3 +40,4 @@ settings:
     - .js
     - .jsx
   import/internal-regex: "^(components|utils|graphql|config)/|^(App|theme|i18n-init)$"
+  ad-hok/should-fix-flow-flowmax: true

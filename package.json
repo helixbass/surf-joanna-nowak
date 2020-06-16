@@ -16,6 +16,7 @@
     "@types/react-dom": "^16.9.0",
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.10.0",
+    "ad-hok": "^0.1.0-beta.1",
     "babel-eslint": "10.1.0",
     "babel-jest": "^24.9.0",
     "babel-loader": "8.1.0",
@@ -89,6 +90,7 @@
   "devDependencies": {
     "babel-plugin-emotion": "^10.0.33",
     "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-ad-hok": "github:helixbass/eslint-plugin-ad-hok#eslint-plugin-ad-hok-v0.2.2-dev.1-gitpkg",
     "eslint-plugin-known-imports": "github:helixbass/eslint-plugin-known-imports#eslint-plugin-known-imports-v0.0.15-dev.2-gitpkg",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-styles-object": "^0.0.4",

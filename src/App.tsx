@@ -1,10 +1,11 @@
 import React, {FC} from 'react'
 import {keyframes} from '@emotion/core'
+import {flowMax, addDisplayName} from 'ad-hok'
 
 import logo from './logo.svg'
 import {makeStyles} from 'utils/style'
 
-const App: FC = () => (
+const App: FC = flowMax(addDisplayName('App'), () => (
   <div css={styles.app}>
     <header css={styles.appHeader}>
       <img src={logo} css={styles.appLogo} alt="logo" />
@@ -21,7 +22,7 @@ const App: FC = () => (
       </a>
     </header>
   </div>
-)
+))
 
 export default App
 
