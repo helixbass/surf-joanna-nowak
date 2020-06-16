@@ -4274,6 +4274,13 @@ eslint-plugin-react@7.19.0:
     string.prototype.matchall "^4.0.2"
     xregexp "^4.3.0"
 
+eslint-plugin-styles-object@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-styles-object/-/eslint-plugin-styles-object-0.0.4.tgz#d292fb5e77f09ed3f44dbc1e48aa8e3f8c1666ae"
+  integrity sha512-GobbFeOwIVxSez47LwtJY97M5kxYSYOJYRxJQvRl/2V5G/fhaHDtRG4vD+7LSUVjC9RAWbLMebV82j7Zox5Stg==
+  dependencies:
+    lodash "^4.17.11"
+
 eslint-scope@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-4.0.3.tgz#ca03833310f6889a3264781aa82e63eb9cfe7848"

@@ -3,5 +3,10 @@ extends:
   - prettier
 plugins:
   - prettier
+  - styles-object
 rules:
   prettier/prettier: error
+  styles-object/no-unused-styles: error
+  styles-object/no-undef-styles: error
+settings:
+  styles-object/stylesheet-create-function: makeStyles

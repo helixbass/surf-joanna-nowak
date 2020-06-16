@@ -4,4 +4,5 @@ type StylesObject = {
   [className: string]: InterpolationWithTheme<any>
 }
 
-export const makeStyles = (styles: StylesObject) => styles
+export const makeStyles = <TStyles extends StylesObject>(styles: TStyles) =>
+  styles
