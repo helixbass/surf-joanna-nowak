@@ -1,4 +1,3 @@
 module.exports = {
-  presets: ['react-app'],
-  plugins: ['emotion'],
+  presets: ['react-app', '@emotion/babel-preset-css-prop'],
 }
