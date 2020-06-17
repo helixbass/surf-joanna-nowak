@@ -1,7 +1,21 @@
 import React, {FC} from 'react'
-import {flowMax, addDisplayName, addProps} from 'ad-hok'
+import {
+  flowMax,
+  addDisplayName,
+  addProps,
+  addState,
+  addHandlers,
+  addStateHandlers,
+} from 'ad-hok'
+import {set as setMutate} from 'lodash'
+import gsap from 'gsap'
+import {random} from 'lodash/fp'
 
 import {makeStyles, colors} from 'utils/style'
+import {DrawSVGPlugin} from 'utils/gsap/DrawSVGPlugin'
+import {addLayoutEffectOnMount} from 'utils/addEffectOnMount'
+
+gsap.registerPlugin(DrawSVGPlugin)
 
 const CIRCLE_WIDTH = 400
 const CIRCLE_RADIUS = CIRCLE_WIDTH * 0.5
@@ -11,12 +25,22 @@ const INNER_CIRCLE_WIDTH = CIRCLE_WIDTH - 2 * INNER_CIRCLE_PADDING_PER_SIDE
 // const INNER_CIRCLE_RADIUS = INNER_CIRCLE_WIDTH * 0.5
 const {PI} = Math
 
-const getAngleFromVertical = (radians: number) =>
+type Angle = number
+
+const getAngleFromVertical = (radians: Angle) =>
   radians > PI ? PI * 2 - radians : radians
 
+const getRandomAngle = (): Angle => random(2 * PI, true)
+
+type Ref = HTMLElement | SVGElement | null
+type Refs = {
+  [name: string]: Ref
+}
+
 interface BlueStripeProps {
-  startPosition: number
-  endPosition: number
+  startPosition: Angle
+  endPosition: Angle
+  generateNewStripe: ({startPosition}: {startPosition: Angle}) => void
 }
 
 const BlueStripe: FC<BlueStripeProps> = flowMax(
@@ -72,6 +96,23 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
     }),
     ['angleFromHorizontal', 'whiteStripeTranslateUnangled'],
   ),
+  addState('refs', 'setRefs', {} as Refs),
+  addHandlers({
+    setRef: ({refs}) => (name: string) => (ref: Ref) => {
+      setMutate(refs, name, ref)
+    },
+  }),
+  addLayoutEffectOnMount(({refs, endPosition, generateNewStripe}) => () => {
+    gsap
+      .from([refs.blueStripe, refs.whiteStripe], {
+        duration: 1,
+        drawSVG: '0%',
+        ease: 'linear',
+      })
+      .eventCallback('onComplete', () => {
+        generateNewStripe({startPosition: endPosition})
+      })
+  }),
   ({
     startX,
     startY,
@@ -81,14 +122,17 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
     whiteStripeTranslateY,
     strokeWidthBlue,
     strokeWidthWhite,
+    setRef,
   }) => (
     <>
       <path
+        ref={setRef('blueStripe')}
         d={`M ${startX} ${startY} L ${endX} ${endY}`}
         stroke={colors.blueRoad}
         strokeWidth={strokeWidthBlue}
       />
       <path
+        ref={setRef('whiteStripe')}
         d={`M ${startX} ${startY} L ${endX} ${endY}`}
         stroke={colors.white}
         strokeWidth={strokeWidthWhite}
@@ -98,34 +142,74 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
   ),
 )
 
-const App: FC = flowMax(addDisplayName('App'), () => (
-  <div css={styles.container}>
-    <svg
-      height={CIRCLE_WIDTH}
-      width={CIRCLE_WIDTH}
-      viewBox={`0 0 ${CIRCLE_WIDTH} ${CIRCLE_WIDTH}`}
-    >
-      <defs>
-        <clipPath id={INNER_CIRClE_CLIP_PATH_ID}>
-          <circle
-            cx={CIRCLE_WIDTH / 2}
-            cy={CIRCLE_WIDTH / 2}
-            r={INNER_CIRCLE_WIDTH / 2}
-          />
-        </clipPath>
-      </defs>
-      <circle
-        cx={CIRCLE_WIDTH / 2}
-        cy={CIRCLE_WIDTH / 2}
-        r={CIRCLE_WIDTH / 2}
-        fill={colors.white}
-      />
-      <g clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}>
-        <BlueStripe startPosition={PI * 0.21} endPosition={PI * 1.67} />
-      </g>
-    </svg>
-  </div>
-))
+interface BlueStripeSpec {
+  startPosition: Angle
+  endPosition: Angle
+}
+
+const App: FC = flowMax(
+  addDisplayName('App'),
+  addStateHandlers(
+    {
+      blueStripes: [
+        {
+          startPosition: PI * 1.67,
+          endPosition: PI * 0.21,
+        },
+      ] as BlueStripeSpec[],
+    },
+    {
+      generateNewStripe: ({blueStripes}) => ({
+        startPosition,
+      }: {
+        startPosition: Angle
+      }) => ({
+        blueStripes: [
+          ...blueStripes,
+          {
+            startPosition,
+            endPosition: getRandomAngle(),
+          },
+        ],
+      }),
+    },
+  ),
+  ({blueStripes, generateNewStripe}) => (
+    <div css={styles.container}>
+      <svg
+        height={CIRCLE_WIDTH}
+        width={CIRCLE_WIDTH}
+        viewBox={`0 0 ${CIRCLE_WIDTH} ${CIRCLE_WIDTH}`}
+      >
+        <defs>
+          <clipPath id={INNER_CIRClE_CLIP_PATH_ID}>
+            <circle
+              cx={CIRCLE_WIDTH / 2}
+              cy={CIRCLE_WIDTH / 2}
+              r={INNER_CIRCLE_WIDTH / 2}
+            />
+          </clipPath>
+        </defs>
+        <circle
+          cx={CIRCLE_WIDTH / 2}
+          cy={CIRCLE_WIDTH / 2}
+          r={CIRCLE_WIDTH / 2}
+          fill={colors.white}
+        />
+        <g clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}>
+          {blueStripes.map(({startPosition, endPosition}) => (
+            <BlueStripe
+              startPosition={startPosition}
+              endPosition={endPosition}
+              generateNewStripe={generateNewStripe}
+              key={`${startPosition}-${endPosition}`}
+            />
+          ))}
+        </g>
+      </svg>
+    </div>
+  ),
+)
 
 export default App
 
