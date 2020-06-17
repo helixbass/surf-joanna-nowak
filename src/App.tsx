@@ -30,17 +30,30 @@ type Angle = number
 const getAngleFromVertical = (radians: Angle) =>
   radians > PI ? PI * 2 - radians : radians
 
-const getRandomAngle = (): Angle => random(2 * PI, true)
+const getAngleDifference = (firstAngle: Angle, secondAngle: Angle) => {
+  const difference = Math.abs(firstAngle - secondAngle)
+  return difference > PI ? 2 * PI - difference : difference
+}
+
+const getRandomAngle = ({startPosition}: {startPosition: Angle}): Angle => {
+  while (true) {
+    const angle = random(2 * PI, true)
+    if (getAngleDifference(angle, startPosition) > PI * 0.5) return angle
+  }
+}
 
 type Ref = HTMLElement | SVGElement | null
 type Refs = {
   [name: string]: Ref
 }
 
+type Color = string
+
 interface BlueStripeProps {
   startPosition: Angle
   endPosition: Angle
-  generateNewStripe: ({startPosition}: {startPosition: Angle}) => void
+  generateNewStripe: (opts: {startPosition: Angle; color: Color}) => void
+  color: Color
 }
 
 const BlueStripe: FC<BlueStripeProps> = flowMax(
@@ -102,17 +115,26 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
       setMutate(refs, name, ref)
     },
   }),
-  addLayoutEffectOnMount(({refs, endPosition, generateNewStripe}) => () => {
-    gsap
-      .from([refs.blueStripe, refs.whiteStripe], {
-        duration: 1,
-        drawSVG: '0%',
-        ease: 'linear',
-      })
-      .eventCallback('onComplete', () => {
-        generateNewStripe({startPosition: endPosition})
-      })
-  }),
+  addLayoutEffectOnMount(
+    ({refs, endPosition, generateNewStripe, color}) => () => {
+      const {blueStripe, whiteStripe} = refs
+      gsap
+        .timeline()
+        .from([blueStripe, whiteStripe], {
+          duration: 1,
+          drawSVG: '0%',
+          ease: 'linear',
+        })
+        .call(() => {
+          generateNewStripe({
+            startPosition: endPosition,
+            color:
+              color === colors.blueRoad ? colors.greenOffRoad : colors.blueRoad,
+          })
+        })
+        .to([blueStripe, whiteStripe], {opacity: 0, duration: 1.1, delay: 1})
+    },
+  ),
   ({
     startX,
     startY,
@@ -123,12 +145,13 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
     strokeWidthBlue,
     strokeWidthWhite,
     setRef,
+    color,
   }) => (
     <>
       <path
         ref={setRef('blueStripe')}
         d={`M ${startX} ${startY} L ${endX} ${endY}`}
-        stroke={colors.blueRoad}
+        stroke={color}
         strokeWidth={strokeWidthBlue}
       />
       <path
@@ -145,6 +168,7 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
 interface BlueStripeSpec {
   startPosition: Angle
   endPosition: Angle
+  color: Color
 }
 
 const App: FC = flowMax(
@@ -155,20 +179,24 @@ const App: FC = flowMax(
         {
           startPosition: PI * 1.67,
           endPosition: PI * 0.21,
+          color: colors.blueRoad,
         },
       ] as BlueStripeSpec[],
     },
     {
       generateNewStripe: ({blueStripes}) => ({
         startPosition,
+        color,
       }: {
         startPosition: Angle
+        color: Color
       }) => ({
         blueStripes: [
           ...blueStripes,
           {
             startPosition,
-            endPosition: getRandomAngle(),
+            endPosition: getRandomAngle({startPosition}),
+            color,
           },
         ],
       }),
@@ -197,11 +225,12 @@ const App: FC = flowMax(
           fill={colors.white}
         />
         <g clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}>
-          {blueStripes.map(({startPosition, endPosition}) => (
+          {blueStripes.map(({startPosition, endPosition, color}) => (
             <BlueStripe
               startPosition={startPosition}
               endPosition={endPosition}
               generateNewStripe={generateNewStripe}
+              color={color}
               key={`${startPosition}-${endPosition}`}
             />
           ))}
