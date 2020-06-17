@@ -1,7 +1,7 @@
 import {UnchangedProps} from 'ad-hok'
 
 type TapType = <TProps>(
-  callback: (props: TProps) => void
+  callback: (props: TProps) => void,
 ) => UnchangedProps<TProps>
 
 export const tap: TapType = (callback) => (props) => {

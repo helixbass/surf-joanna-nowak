@@ -8,11 +8,11 @@ declare module 'ad-hok' {
   type ValueOrFunctionOfProps<TProps, T> = T | ((props: TProps) => T)
 
   type CurriedPropsAdder<TProps, AdditionalProps> = (
-    props: TProps
+    props: TProps,
   ) => TProps & AdditionalProps
 
   type SimplePropsAdder<AdditionalProps> = <TProps>(
-    props: TProps
+    props: TProps,
   ) => TProps & AdditionalProps
 
   type UnchangedProps<TProps> = (props: TProps) => TProps
@@ -27,13 +27,13 @@ declare module 'ad-hok' {
   >(
     stateName: TStateName,
     stateUpdaterName: TStateUpdaterName,
-    initialState: ValueOrFunctionOfProps<TProps, TState>
+    initialState: ValueOrFunctionOfProps<TProps, TState>,
   ) => CurriedPropsAdder<
     TProps,
     {[stateName in TStateName]: TState} &
       {
         [stateUpdaterName in TStateUpdaterName]: (
-          state: TState | ((prevState: TState) => TState)
+          state: TState | ((prevState: TState) => TState),
         ) => void
       }
   >
@@ -42,7 +42,7 @@ declare module 'ad-hok' {
 
   type AddEffectType = <TProps>(
     callback: (props: TProps) => () => void,
-    dependencies?: Array<string>
+    dependencies?: Array<string>,
   ) => UnchangedProps<TProps>
 
   declare const addEffect: AddEffectType
@@ -51,14 +51,14 @@ declare module 'ad-hok' {
 
   type AddPropsType = <TProps, AdditionalProps extends {[key: string]: any}>(
     createProps: ValueOrFunctionOfProps<TProps, AdditionalProps>,
-    dependencies?: Array<string>
+    dependencies?: Array<string>,
   ) => CurriedPropsAdder<TProps, AdditionalProps>
 
   declare const addProps: AddPropsType
 
   type AddRefType = <TRefName extends string, TRef, TProps>(
     refName: TRefName,
-    initialValue: ValueOrFunctionOfProps<TProps, TRef>
+    initialValue: ValueOrFunctionOfProps<TProps, TRef>,
   ) => CurriedPropsAdder<
     TProps,
     {[refName in TRefName]: MutableRefObject<TRef>}
@@ -68,7 +68,7 @@ declare module 'ad-hok' {
 
   type AddContextType = <TContextName extends string, TContext, TProps>(
     context: Context<TContext>,
-    contextName: TContextName
+    contextName: TContextName,
   ) => CurriedPropsAdder<TProps, {[contextName in TContextName]: TContext}>
 
   declare const addContext: AddContextType
@@ -79,7 +79,7 @@ declare module 'ad-hok' {
 
   type AddHandlersType = <Creators extends HandlerCreators<TProps>, TProps>(
     handlerCreators: Creators,
-    dependencies?: Array<string>
+    dependencies?: Array<string>,
   ) => CurriedPropsAdder<
     TProps,
     {[K in keyof Creators]: ReturnType<Creators[K]>}
@@ -90,7 +90,7 @@ declare module 'ad-hok' {
   interface StateUpdaters<TProps, TState> {
     [key: string]: (
       state: TState,
-      props: TProps
+      props: TProps,
     ) => (...args: any[]) => Partial<TState>
   }
 
@@ -101,7 +101,7 @@ declare module 'ad-hok' {
   >(
     initialState: ValueOrFunctionOfProps<TProps, TState>,
     stateUpdaters: Updaters,
-    dependencies?: Array<string>
+    dependencies?: Array<string>,
   ) => CurriedPropsAdder<
     TProps,
     TState & {[K in keyof Updaters]: ReturnType<Updaters[K]>}
@@ -112,37 +112,37 @@ declare module 'ad-hok' {
   type AddWrapperType = <AdditionalProps, TProps>(
     callback: (
       render: (additionalProps?: AdditionalProps) => ReactElement | null,
-      props: TProps
-    ) => ReactElement | null
+      props: TProps,
+    ) => ReactElement | null,
   ) => CurriedPropsAdder<TProps, AdditionalProps>
 
   declare const addWrapper: AddWrapperType
 
   type AddWrapperRenderCallback<TAdditionalProps> = (
-    additionalProps: TAdditionalProps
+    additionalProps: TAdditionalProps,
   ) => ReactElement | null
 
   type AddPropTypesType = <TPropTypes, TProps>(
-    propTypes: ValidationMap<TPropTypes>
+    propTypes: ValidationMap<TPropTypes>,
   ) => UnchangedProps<TProps>
 
   declare const addPropTypes: AddPropTypesType
 
   type BranchOneBranchType = <TProps>(
     test: (props: TProps) => boolean,
-    left: (props: TProps) => any
+    left: (props: TProps) => any,
   ) => UnchangedProps<TProps>
 
   type BranchTwoBranchType = <RightProps, TProps>(
     test: (props: TProps) => boolean,
     left: (props: TProps) => any,
-    right: (props: TProps) => RightProps
+    right: (props: TProps) => RightProps,
   ) => CurriedPropsAdder<TProps, RightProps>
 
   declare const branch: BranchOneBranchType & BranchTwoBranchType
 
   type ReturnsType = <TProps>(
-    callback: (props: TProps) => any
+    callback: (props: TProps) => any,
   ) => UnchangedProps<TProps>
 
   declare const returns: ReturnsType
@@ -154,23 +154,23 @@ declare module 'ad-hok' {
   declare const flowMax: FlowMaxType
 
   export type PropAddingHOCType<AddedProps> = (
-    component: ComponentType<any>
+    component: ComponentType<any>,
   ) => ComponentType<any>
 
   type AddWrapperHOCType = <AddedProps, TProps>(
-    hoc: PropAddingHOCType<AddedProps>
+    hoc: PropAddingHOCType<AddedProps>,
   ) => CurriedPropsAdder<TProps, AddedProps>
 
   declare const addWrapperHOC: AddWrapperHOCType
 
   type AddDisplayNameType = <TProps>(
-    displayName: string
+    displayName: string,
   ) => UnchangedProps<TProps>
 
   declare const addDisplayName: AddDisplayNameType
 
   type AddMemoBoundaryType = (
-    dependencies?: string[] | ((oldProps: any, newProps: any) => boolean)
+    dependencies?: string[] | ((oldProps: any, newProps: any) => boolean),
   ) => SimpleUnchangedProps
 
   declare const addMemoBoundary: AddMemoBoundaryType
