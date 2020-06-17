@@ -11,6 +11,9 @@ const INNER_CIRCLE_WIDTH = CIRCLE_WIDTH - 2 * INNER_CIRCLE_PADDING_PER_SIDE
 // const INNER_CIRCLE_RADIUS = INNER_CIRCLE_WIDTH * 0.5
 const {PI} = Math
 
+const getAngleFromVertical = (radians: number) =>
+  radians > PI ? PI * 2 - radians : radians
+
 interface BlueStripeProps {
   startPosition: number
   endPosition: number
@@ -33,13 +36,65 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
         endY: CIRCLE_RADIUS + endY * CIRCLE_RADIUS,
       }),
     ),
+    ['startPosition', 'endPosition'],
   ),
-  ({startX, startY, endX, endY}) => (
-    <path
-      d={`M ${startX} ${startY} L ${endX} ${endY}`}
-      stroke={colors.blueRoad}
-      strokeWidth={CIRCLE_WIDTH * 0.14}
-    />
+  addProps(
+    ({startPosition, endPosition}) => ({
+      angleFromHorizontal:
+        getAngleFromVertical(startPosition) - getAngleFromVertical(endPosition),
+    }),
+    ['startPosition', 'endPosition'],
+  ),
+  addProps({
+    strokeWidthBlue: CIRCLE_WIDTH * 0.14,
+    strokeWidthWhite: CIRCLE_WIDTH * 0.014,
+  }),
+  addProps(
+    ({strokeWidthBlue, strokeWidthWhite}) => ({
+      spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered:
+        (strokeWidthBlue - strokeWidthWhite) * 0.5,
+    }),
+    ['strokeWidthBlue', 'strokeWidthWhite'],
+  ),
+  addProps(
+    ({spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered}) => ({
+      whiteStripeTranslateUnangled:
+        spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered * 0.78,
+    }),
+    ['spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered'],
+  ),
+  addProps(
+    ({angleFromHorizontal, whiteStripeTranslateUnangled}) => ({
+      whiteStripeTranslateX:
+        whiteStripeTranslateUnangled * Math.sin(angleFromHorizontal),
+      whiteStripeTranslateY:
+        whiteStripeTranslateUnangled * Math.cos(angleFromHorizontal),
+    }),
+    ['angleFromHorizontal', 'whiteStripeTranslateUnangled'],
+  ),
+  ({
+    startX,
+    startY,
+    endX,
+    endY,
+    whiteStripeTranslateX,
+    whiteStripeTranslateY,
+    strokeWidthBlue,
+    strokeWidthWhite,
+  }) => (
+    <>
+      <path
+        d={`M ${startX} ${startY} L ${endX} ${endY}`}
+        stroke={colors.blueRoad}
+        strokeWidth={strokeWidthBlue}
+      />
+      <path
+        d={`M ${startX} ${startY} L ${endX} ${endY}`}
+        stroke={colors.white}
+        strokeWidth={strokeWidthWhite}
+        transform={`translate(${whiteStripeTranslateX} ${whiteStripeTranslateY})`}
+      />
+    </>
   ),
 )
 
@@ -66,7 +121,7 @@ const App: FC = flowMax(addDisplayName('App'), () => (
         fill={colors.white}
       />
       <g clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}>
-        <BlueStripe startPosition={PI * 0.17} endPosition={PI * 1.7} />
+        <BlueStripe startPosition={PI * 0.21} endPosition={PI * 1.67} />
       </g>
     </svg>
   </div>
