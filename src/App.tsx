@@ -7,7 +7,7 @@ import {
   addHandlers,
   addStateHandlers,
 } from 'ad-hok'
-import {set as setMutate} from 'lodash'
+import {set as setMutate, delay} from 'lodash'
 import gsap from 'gsap'
 import {random} from 'lodash/fp'
 
@@ -121,16 +121,22 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
       gsap
         .timeline()
         .from([blueStripe, whiteStripe], {
-          duration: 1,
+          duration: 0.3,
           drawSVG: '0%',
           ease: 'linear',
         })
         .call(() => {
-          generateNewStripe({
-            startPosition: endPosition,
-            color:
-              color === colors.blueRoad ? colors.greenOffRoad : colors.blueRoad,
-          })
+          delay(
+            () =>
+              generateNewStripe({
+                startPosition: endPosition,
+                color:
+                  color === colors.blueRoad
+                    ? colors.greenOffRoad
+                    : colors.blueRoad,
+              }),
+            random(2000, true),
+          )
         })
         .to([blueStripe, whiteStripe], {opacity: 0, duration: 1.1, delay: 1})
     },

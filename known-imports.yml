@@ -54,7 +54,7 @@ imports:
   isArray: lodash/fp
   isNumber: lodash/fp
   identity: lodash/fp
-  delay: lodash/fp
+  delay: lodash
   defer: lodash/fp
   ceil: lodash/fp
   random: lodash/fp
