@@ -224,6 +224,7 @@ const App: FC = flowMax(
       duration: 340,
       rotate: 360,
       repeat: -1,
+      ease: 'linear',
     })
   }),
   ({blueStripes, generateNewStripe, setRef}) => (
