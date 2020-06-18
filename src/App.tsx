@@ -208,7 +208,25 @@ const App: FC = flowMax(
       }),
     },
   ),
-  ({blueStripes, generateNewStripe}) => (
+  addState('refs', 'setRefs', {} as Refs),
+  addHandlers({
+    setRef: ({refs}) => (name: string) => (ref: Ref) => {
+      setMutate(refs, name, ref)
+    },
+  }),
+  addLayoutEffectOnMount(({refs}) => () => {
+    const {circleContents} = refs
+    // gsap.set(circleContents, {
+    //   // transformOrigin: '50% 50%',
+    //   transformOrigin: `${CIRCLE_RADIUS} ${CIRCLE_RADIUS}`,
+    // })
+    gsap.to(circleContents, {
+      duration: 340,
+      rotate: 360,
+      repeat: -1,
+    })
+  }),
+  ({blueStripes, generateNewStripe, setRef}) => (
     <div css={styles.container}>
       <svg
         height={CIRCLE_WIDTH}
@@ -230,7 +248,11 @@ const App: FC = flowMax(
           r={CIRCLE_WIDTH / 2}
           fill={colors.white}
         />
-        <g clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}>
+        <g
+          clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}
+          data-svg-origin={`${CIRCLE_RADIUS} ${CIRCLE_RADIUS}`}
+          ref={setRef('circleContents')}
+        >
           {blueStripes.map(({startPosition, endPosition, color}) => (
             <BlueStripe
               startPosition={startPosition}
