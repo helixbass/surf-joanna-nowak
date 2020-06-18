@@ -3,7 +3,13 @@
 
 declare module 'ad-hok' {
   import {ValidationMap} from 'prop-types'
-  import {ComponentType, Context, MutableRefObject, ReactElement} from 'react'
+  import {
+    ComponentType,
+    Context,
+    MutableRefObject,
+    ReactElement,
+    Reducer,
+  } from 'react'
 
   type ValueOrFunctionOfProps<TProps, T> = T | ((props: TProps) => T)
 
