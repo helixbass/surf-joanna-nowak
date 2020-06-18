@@ -1,13 +1,13 @@
-import React, {FC} from 'react'
+import React, {FC, Reducer} from 'react'
 import {
   flowMax,
   addDisplayName,
   addProps,
   addState,
   addHandlers,
-  addStateHandlers,
+  addReducer,
 } from 'ad-hok'
-import {set as setMutate, delay} from 'lodash'
+import {set as setMutate, delay, without} from 'lodash'
 import gsap from 'gsap'
 import {random} from 'lodash/fp'
 
@@ -54,6 +54,7 @@ interface BlueStripeProps {
   endPosition: Angle
   generateNewStripe: (opts: {startPosition: Angle; color: Color}) => void
   color: Color
+  removeSelf: () => void
 }
 
 const BlueStripe: FC<BlueStripeProps> = flowMax(
@@ -116,7 +117,7 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
     },
   }),
   addLayoutEffectOnMount(
-    ({refs, endPosition, generateNewStripe, color}) => () => {
+    ({refs, endPosition, generateNewStripe, color, removeSelf}) => () => {
       const {blueStripe, whiteStripe} = refs
       gsap
         .timeline()
@@ -126,19 +127,22 @@ const BlueStripe: FC<BlueStripeProps> = flowMax(
           ease: 'linear',
         })
         .call(() => {
-          delay(
-            () =>
-              generateNewStripe({
-                startPosition: endPosition,
-                color:
-                  color === colors.blueRoad
-                    ? colors.greenOffRoad
-                    : colors.blueRoad,
-              }),
-            random(2000, true),
-          )
+          delay(() => {
+            generateNewStripe({
+              startPosition: endPosition,
+              color:
+                color === colors.blueRoad
+                  ? colors.greenOffRoad
+                  : colors.blueRoad,
+            })
+          }, random(2000, true))
         })
-        .to([blueStripe, whiteStripe], {opacity: 0, duration: 1.1, delay: 1})
+        .to([blueStripe, whiteStripe], {
+          opacity: 0,
+          duration: 1.1,
+          delay: 1,
+        })
+        .call(removeSelf)
     },
   ),
   ({
@@ -177,37 +181,54 @@ interface BlueStripeSpec {
   color: Color
 }
 
-const App: FC = flowMax(
-  addDisplayName('App'),
-  addStateHandlers(
-    {
-      blueStripes: [
-        {
-          startPosition: PI * 1.67,
-          endPosition: PI * 0.21,
-          color: colors.blueRoad,
-        },
-      ] as BlueStripeSpec[],
-    },
-    {
-      generateNewStripe: ({blueStripes}) => ({
-        startPosition,
-        color,
-      }: {
-        startPosition: Angle
-        color: Color
-      }) => ({
+type BlueStripesReducerState = {
+  blueStripes: BlueStripeSpec[]
+}
+
+type BlueStripesReducerAction =
+  | {type: 'generateNewStripe'; startPosition: Angle; color: Color}
+  | {type: 'removeBlueStripe'; blueStripe: BlueStripeSpec}
+
+const reducer: Reducer<BlueStripesReducerState, BlueStripesReducerAction> = (
+  state,
+  action,
+) => {
+  switch (action.type) {
+    case 'generateNewStripe': {
+      const {startPosition, color} = action
+      return {
+        ...state,
         blueStripes: [
-          ...blueStripes,
+          ...state.blueStripes,
           {
             startPosition,
             endPosition: getRandomAngle({startPosition}),
             color,
           },
         ],
-      }),
-    },
-  ),
+      }
+    }
+    case 'removeBlueStripe': {
+      const {blueStripe} = action
+      return {
+        ...state,
+        blueStripes: without(state.blueStripes, blueStripe),
+      }
+    }
+  }
+}
+
+const App: FC = flowMax(
+  addDisplayName('App'),
+  addReducer(reducer, {
+    blueStripes: [
+      {
+        startPosition: PI * 1.67,
+        endPosition: PI * 0.21,
+        color: colors.blueRoad,
+      },
+    ],
+  }),
   addState('refs', 'setRefs', {} as Refs),
   addHandlers({
     setRef: ({refs}) => (name: string) => (ref: Ref) => {
@@ -227,7 +248,7 @@ const App: FC = flowMax(
       ease: 'linear',
     })
   }),
-  ({blueStripes, generateNewStripe, setRef}) => (
+  ({blueStripes, dispatch, setRef}) => (
     <div css={styles.container}>
       <svg
         height={CIRCLE_WIDTH}
@@ -254,13 +275,29 @@ const App: FC = flowMax(
           data-svg-origin={`${CIRCLE_RADIUS} ${CIRCLE_RADIUS}`}
           ref={setRef('circleContents')}
         >
-          {blueStripes.map(({startPosition, endPosition, color}) => (
+          {blueStripes.map((blueStripeSpec) => (
             <BlueStripe
-              startPosition={startPosition}
-              endPosition={endPosition}
-              generateNewStripe={generateNewStripe}
-              color={color}
-              key={`${startPosition}-${endPosition}`}
+              {...blueStripeSpec}
+              generateNewStripe={({
+                startPosition,
+                color,
+              }: {
+                startPosition: Angle
+                color: Color
+              }) => {
+                dispatch({
+                  type: 'generateNewStripe',
+                  startPosition,
+                  color,
+                })
+              }}
+              removeSelf={() => {
+                dispatch({
+                  type: 'removeBlueStripe',
+                  blueStripe: blueStripeSpec,
+                })
+              }}
+              key={`${blueStripeSpec.startPosition}-${blueStripeSpec.endPosition}`}
             />
           ))}
         </g>

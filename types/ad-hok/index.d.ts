@@ -174,4 +174,13 @@ declare module 'ad-hok' {
   ) => SimpleUnchangedProps
 
   declare const addMemoBoundary: AddMemoBoundaryType
+
+  type AddReducerType = <TState, TAction, TProps>(
+    reducer: Reducer<TState, TAction>,
+    initialState: TState,
+  ) => (
+    props: TProps,
+  ) => TProps & TState & {dispatch: (action: TAction) => void}
+
+  declare const addReducer: AddReducerType
 }

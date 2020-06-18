@@ -104,6 +104,7 @@ imports:
   Context: react
   ReactElement: react
   Ref: react
+  Reducer: react
   PropTypes:
     module: prop-types
     default: true
@@ -132,6 +133,7 @@ imports:
   AddWrapperRenderCallback: ad-hok
   addMemoBoundary: ad-hok
   addLayoutEffect: ad-hok
+  addReducer: ad-hok
   moment:
     module: moment
     default: true
