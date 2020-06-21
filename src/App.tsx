@@ -1,5 +1,5 @@
-import React, {FC, Reducer} from 'react'
-import {flowMax, addDisplayName, addReducer, addHandlers} from 'ad-hok'
+import React, {FC} from 'react'
+import {flowMax, addDisplayName, addHandlers, addStateHandlers} from 'ad-hok'
 import {without} from 'lodash'
 import gsap from 'gsap'
 import 'typeface-lobster'
@@ -27,54 +27,40 @@ interface BlueStripeSpec {
   color: Color
 }
 
-type BlueStripesReducerState = {
-  blueStripes: BlueStripeSpec[]
-}
-
-type BlueStripesReducerAction =
-  | {type: 'generateNewStripe'; startPosition: Angle; color: Color}
-  | {type: 'removeBlueStripe'; blueStripe: BlueStripeSpec}
-
-const reducer: Reducer<BlueStripesReducerState, BlueStripesReducerAction> = (
-  state,
-  action,
-) => {
-  switch (action.type) {
-    case 'generateNewStripe': {
-      const {startPosition, color} = action
-      return {
-        ...state,
+const App: FC = flowMax(
+  addDisplayName('App'),
+  addStateHandlers(
+    {
+      blueStripes: [
+        {
+          startPosition: PI * 1.67,
+          endPosition: PI * 0.21,
+          color: colors.blueRoad,
+        },
+      ] as BlueStripeSpec[],
+    },
+    {
+      generateNewStripe: ({blueStripes}) => ({
+        startPosition,
+        color,
+      }: {
+        startPosition: Angle
+        color: Color
+      }) => ({
         blueStripes: [
-          ...state.blueStripes,
+          ...blueStripes,
           {
             startPosition,
             endPosition: getRandomAngle({startPosition}),
             color,
           },
         ],
-      }
-    }
-    case 'removeBlueStripe': {
-      const {blueStripe} = action
-      return {
-        ...state,
-        blueStripes: without(state.blueStripes, blueStripe),
-      }
-    }
-  }
-}
-
-const App: FC = flowMax(
-  addDisplayName('App'),
-  addReducer(reducer, {
-    blueStripes: [
-      {
-        startPosition: PI * 1.67,
-        endPosition: PI * 0.21,
-        color: colors.blueRoad,
-      },
-    ],
-  }),
+      }),
+      removeBlueStripe: ({blueStripes}) => (blueStripe: BlueStripeSpec) => ({
+        blueStripes: without(blueStripes, blueStripe),
+      }),
+    },
+  ),
   addRefs,
   addLayoutEffectOnMount(({refs}) => () => {
     const {circleContents} = refs
@@ -92,7 +78,13 @@ const App: FC = flowMax(
   addHandlers({
     onFinishedLoading: () => () => {},
   }),
-  ({blueStripes, dispatch, setRef, onFinishedLoading}) => (
+  ({
+    blueStripes,
+    generateNewStripe,
+    removeBlueStripe,
+    setRef,
+    onFinishedLoading,
+  }) => (
     <div css={styles.container}>
       <svg
         height={CIRCLE_WIDTH}
@@ -122,24 +114,9 @@ const App: FC = flowMax(
           {blueStripes.map((blueStripeSpec) => (
             <BlueStripe
               {...blueStripeSpec}
-              generateNewStripe={({
-                startPosition,
-                color,
-              }: {
-                startPosition: Angle
-                color: Color
-              }) => {
-                dispatch({
-                  type: 'generateNewStripe',
-                  startPosition,
-                  color,
-                })
-              }}
+              generateNewStripe={generateNewStripe}
               removeSelf={() => {
-                dispatch({
-                  type: 'removeBlueStripe',
-                  blueStripe: blueStripeSpec,
-                })
+                removeBlueStripe(blueStripeSpec)
               }}
               key={`${blueStripeSpec.startPosition}-${blueStripeSpec.endPosition}`}
             />

@@ -2068,11 +2068,6 @@ ad-hok-utils@^0.0.4:
     lodash "^4.17.15"
     prop-types "^15.7.2"
 
-ad-hok@^0.1.0-beta.1:
-  version "0.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/ad-hok/-/ad-hok-0.1.0-beta.1.tgz#2f959e29f50616328415e5ed78d25641f3ca3a03"
-  integrity sha512-G9YaYoVw9qZplfYThXdB1tEhNOjLnSAHIGiT1qFsKq+KKm1d/PsxKPcsTTs8P74EHijdlEPTAvKxRpA/OUZq2Q==
-
 ad-hok@^0.1.0-beta.2:
   version "0.1.0-beta.2"
   resolved "https://registry.yarnpkg.com/ad-hok/-/ad-hok-0.1.0-beta.2.tgz#069a90100f40d1b7dafc874e0c290548c8b3ac53"
