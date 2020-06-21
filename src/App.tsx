@@ -1,179 +1,24 @@
 import React, {FC, Reducer} from 'react'
-import {
-  flowMax,
-  addDisplayName,
-  addProps,
-  addState,
-  addHandlers,
-  addReducer,
-} from 'ad-hok'
-import {set as setMutate, delay, without} from 'lodash'
+import {flowMax, addDisplayName, addReducer} from 'ad-hok'
+import {without} from 'lodash'
 import gsap from 'gsap'
-import {random} from 'lodash/fp'
+import 'typeface-lobster'
+import {addLayoutEffectOnMount} from 'ad-hok-utils'
 
-import {makeStyles, colors} from 'utils/style'
+import {makeStyles} from 'utils/style'
 import {DrawSVGPlugin} from 'utils/gsap/DrawSVGPlugin'
-import {addLayoutEffectOnMount} from 'utils/addEffectOnMount'
+import BlueStripe from 'components/BlueStripe'
+import {Angle, getRandomAngle, PI} from 'utils/angles'
+import {Color, colors} from 'utils/colors'
+import {
+  CIRCLE_WIDTH,
+  INNER_CIRClE_CLIP_PATH_ID,
+  INNER_CIRCLE_WIDTH,
+  CIRCLE_RADIUS,
+} from 'utils/sizes'
+import {addRefs} from 'utils/refs'
 
 gsap.registerPlugin(DrawSVGPlugin)
-
-const CIRCLE_WIDTH = 400
-const CIRCLE_RADIUS = CIRCLE_WIDTH * 0.5
-const INNER_CIRClE_CLIP_PATH_ID = 'inner-circle-clip-path'
-const INNER_CIRCLE_PADDING_PER_SIDE = CIRCLE_WIDTH * 0.068
-const INNER_CIRCLE_WIDTH = CIRCLE_WIDTH - 2 * INNER_CIRCLE_PADDING_PER_SIDE
-// const INNER_CIRCLE_RADIUS = INNER_CIRCLE_WIDTH * 0.5
-const {PI} = Math
-
-type Angle = number
-
-const getAngleFromVertical = (radians: Angle) =>
-  radians > PI ? PI * 2 - radians : radians
-
-const getAngleDifference = (firstAngle: Angle, secondAngle: Angle) => {
-  const difference = Math.abs(firstAngle - secondAngle)
-  return difference > PI ? 2 * PI - difference : difference
-}
-
-const getRandomAngle = ({startPosition}: {startPosition: Angle}): Angle => {
-  while (true) {
-    const angle = random(2 * PI, true)
-    if (getAngleDifference(angle, startPosition) > PI * 0.5) return angle
-  }
-}
-
-type Ref = HTMLElement | SVGElement | null
-type Refs = {
-  [name: string]: Ref
-}
-
-type Color = string
-
-interface BlueStripeProps {
-  startPosition: Angle
-  endPosition: Angle
-  generateNewStripe: (opts: {startPosition: Angle; color: Color}) => void
-  color: Color
-  removeSelf: () => void
-}
-
-const BlueStripe: FC<BlueStripeProps> = flowMax(
-  addDisplayName('BlueStripe'),
-  addProps(
-    flowMax(
-      ({startPosition, endPosition}) => ({
-        startX: Math.sin(startPosition),
-        startY: Math.cos(startPosition) * -1,
-        endX: Math.sin(endPosition),
-        endY: Math.cos(endPosition) * -1,
-      }),
-      ({startX, startY, endX, endY}) => ({
-        startX: CIRCLE_RADIUS + startX * CIRCLE_RADIUS,
-        startY: CIRCLE_RADIUS + startY * CIRCLE_RADIUS,
-        endX: CIRCLE_RADIUS + endX * CIRCLE_RADIUS,
-        endY: CIRCLE_RADIUS + endY * CIRCLE_RADIUS,
-      }),
-    ),
-    ['startPosition', 'endPosition'],
-  ),
-  addProps(
-    ({startPosition, endPosition}) => ({
-      angleFromHorizontal:
-        getAngleFromVertical(startPosition) - getAngleFromVertical(endPosition),
-    }),
-    ['startPosition', 'endPosition'],
-  ),
-  addProps({
-    strokeWidthBlue: CIRCLE_WIDTH * 0.14,
-    strokeWidthWhite: CIRCLE_WIDTH * 0.014,
-  }),
-  addProps(
-    ({strokeWidthBlue, strokeWidthWhite}) => ({
-      spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered:
-        (strokeWidthBlue - strokeWidthWhite) * 0.5,
-    }),
-    ['strokeWidthBlue', 'strokeWidthWhite'],
-  ),
-  addProps(
-    ({spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered}) => ({
-      whiteStripeTranslateUnangled:
-        spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered * 0.78,
-    }),
-    ['spaceBetweenBlueEdgeAndWhiteEdgeWhenCentered'],
-  ),
-  addProps(
-    ({angleFromHorizontal, whiteStripeTranslateUnangled}) => ({
-      whiteStripeTranslateX:
-        whiteStripeTranslateUnangled * Math.sin(angleFromHorizontal),
-      whiteStripeTranslateY:
-        whiteStripeTranslateUnangled * Math.cos(angleFromHorizontal),
-    }),
-    ['angleFromHorizontal', 'whiteStripeTranslateUnangled'],
-  ),
-  addState('refs', 'setRefs', {} as Refs),
-  addHandlers({
-    setRef: ({refs}) => (name: string) => (ref: Ref) => {
-      setMutate(refs, name, ref)
-    },
-  }),
-  addLayoutEffectOnMount(
-    ({refs, endPosition, generateNewStripe, color, removeSelf}) => () => {
-      const {blueStripe, whiteStripe} = refs
-      gsap
-        .timeline()
-        .from([blueStripe, whiteStripe], {
-          duration: 0.3,
-          drawSVG: '0%',
-          ease: 'linear',
-        })
-        .call(() => {
-          delay(() => {
-            generateNewStripe({
-              startPosition: endPosition,
-              color:
-                color === colors.blueRoad
-                  ? colors.greenOffRoad
-                  : colors.blueRoad,
-            })
-          }, random(2000, true))
-        })
-        .to([blueStripe, whiteStripe], {
-          opacity: 0,
-          duration: 1.1,
-          delay: 1,
-        })
-        .call(removeSelf)
-    },
-  ),
-  ({
-    startX,
-    startY,
-    endX,
-    endY,
-    whiteStripeTranslateX,
-    whiteStripeTranslateY,
-    strokeWidthBlue,
-    strokeWidthWhite,
-    setRef,
-    color,
-  }) => (
-    <>
-      <path
-        ref={setRef('blueStripe')}
-        d={`M ${startX} ${startY} L ${endX} ${endY}`}
-        stroke={color}
-        strokeWidth={strokeWidthBlue}
-      />
-      <path
-        ref={setRef('whiteStripe')}
-        d={`M ${startX} ${startY} L ${endX} ${endY}`}
-        stroke={colors.white}
-        strokeWidth={strokeWidthWhite}
-        transform={`translate(${whiteStripeTranslateX} ${whiteStripeTranslateY})`}
-      />
-    </>
-  ),
-)
 
 interface BlueStripeSpec {
   startPosition: Angle
@@ -229,12 +74,7 @@ const App: FC = flowMax(
       },
     ],
   }),
-  addState('refs', 'setRefs', {} as Refs),
-  addHandlers({
-    setRef: ({refs}) => (name: string) => (ref: Ref) => {
-      setMutate(refs, name, ref)
-    },
-  }),
+  addRefs,
   addLayoutEffectOnMount(({refs}) => () => {
     const {circleContents} = refs
     // gsap.set(circleContents, {
