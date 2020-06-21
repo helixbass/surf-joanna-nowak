@@ -57,7 +57,7 @@ imports:
   delay: lodash
   defer: lodash/fp
   ceil: lodash/fp
-  random: lodash/fp
+  random: lodash
   debounce: lodash/fp
   throttle: lodash/fp
   camelCase: lodash/fp
@@ -295,6 +295,10 @@ imports:
   addEffectOnMount: ad-hok-utils
   addLayoutEffectOnMount: ad-hok-utils
   cleanupProps: ad-hok-utils
+  colorUtil:
+    module: color
+    default: true
+  Transition: react-transition-group
 whitelist:
   - directory: src/
     allowed: [filename, named]

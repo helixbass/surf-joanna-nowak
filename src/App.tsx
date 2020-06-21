@@ -1,5 +1,5 @@
 import React, {FC, Reducer} from 'react'
-import {flowMax, addDisplayName, addReducer} from 'ad-hok'
+import {flowMax, addDisplayName, addReducer, addHandlers} from 'ad-hok'
 import {without} from 'lodash'
 import gsap from 'gsap'
 import 'typeface-lobster'
@@ -17,6 +17,7 @@ import {
   CIRCLE_RADIUS,
 } from 'utils/sizes'
 import {addRefs} from 'utils/refs'
+import Loading from 'components/Loading'
 
 gsap.registerPlugin(DrawSVGPlugin)
 
@@ -88,7 +89,10 @@ const App: FC = flowMax(
       ease: 'linear',
     })
   }),
-  ({blueStripes, dispatch, setRef}) => (
+  addHandlers({
+    onFinishedLoading: () => () => {},
+  }),
+  ({blueStripes, dispatch, setRef, onFinishedLoading}) => (
     <div css={styles.container}>
       <svg
         height={CIRCLE_WIDTH}
@@ -142,6 +146,7 @@ const App: FC = flowMax(
           ))}
         </g>
       </svg>
+      <Loading onFinished={onFinishedLoading} />
     </div>
   ),
 )
