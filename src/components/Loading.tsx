@@ -14,6 +14,7 @@ import {addExtendedHandlers} from 'ad-hok-utils'
 import {makeStyles} from 'utils/style'
 import {colors, atOpacity} from 'utils/colors'
 import addRenderingDelay from 'utils/addRenderingDelay'
+import CenteredContainer from 'components/CenteredContainer'
 
 interface Props {
   onFinished: () => void
@@ -87,25 +88,15 @@ const Loading: FC<Props> = flowMax(
     ['percent'],
   ),
   ({percent}) => (
-    <div css={styles.container}>
+    <CenteredContainer>
       <span css={styles.percent}>{percent}%</span>
-    </div>
+    </CenteredContainer>
   ),
 )
 
 export default Loading
 
 const styles = makeStyles({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   percent: {
     fontFamily: 'lobster',
     fontSize: 84,

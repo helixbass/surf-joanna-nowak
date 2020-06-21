@@ -1,5 +1,12 @@
 import React, {FC} from 'react'
-import {flowMax, addDisplayName, addHandlers, addStateHandlers} from 'ad-hok'
+import {
+  flowMax,
+  addDisplayName,
+  addStateHandlers,
+  addWrapper,
+  branch,
+  renderNothing,
+} from 'ad-hok'
 import {without} from 'lodash'
 import gsap from 'gsap'
 import 'typeface-lobster'
@@ -18,6 +25,7 @@ import {
 } from 'utils/sizes'
 import {addRefs} from 'utils/refs'
 import Loading from 'components/Loading'
+import LetsGoButton from 'components/LetsGoButton'
 
 gsap.registerPlugin(DrawSVGPlugin)
 
@@ -75,57 +83,72 @@ const App: FC = flowMax(
       ease: 'linear',
     })
   }),
-  addHandlers({
-    onFinishedLoading: () => () => {},
-  }),
-  ({
-    blueStripes,
-    generateNewStripe,
-    removeBlueStripe,
-    setRef,
-    onFinishedLoading,
-  }) => (
-    <div css={styles.container}>
-      <svg
-        height={CIRCLE_WIDTH}
-        width={CIRCLE_WIDTH}
-        viewBox={`0 0 ${CIRCLE_WIDTH} ${CIRCLE_WIDTH}`}
-      >
-        <defs>
-          <clipPath id={INNER_CIRClE_CLIP_PATH_ID}>
-            <circle
-              cx={CIRCLE_WIDTH / 2}
-              cy={CIRCLE_WIDTH / 2}
-              r={INNER_CIRCLE_WIDTH / 2}
-            />
-          </clipPath>
-        </defs>
-        <circle
-          cx={CIRCLE_WIDTH / 2}
-          cy={CIRCLE_WIDTH / 2}
-          r={CIRCLE_WIDTH / 2}
-          fill={colors.white}
-        />
-        <g
-          clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}
-          data-svg-origin={`${CIRCLE_RADIUS} ${CIRCLE_RADIUS}`}
-          ref={setRef('circleContents')}
-        >
-          {blueStripes.map((blueStripeSpec) => (
-            <BlueStripe
-              {...blueStripeSpec}
-              generateNewStripe={generateNewStripe}
-              removeSelf={() => {
-                removeBlueStripe(blueStripeSpec)
-              }}
-              key={`${blueStripeSpec.startPosition}-${blueStripeSpec.endPosition}`}
-            />
-          ))}
-        </g>
-      </svg>
-      <Loading onFinished={onFinishedLoading} />
-    </div>
+  addStateHandlers(
+    {
+      isLoading: true,
+    },
+    {
+      onFinishedLoading: () => () => ({
+        isLoading: false,
+      }),
+    },
   ),
+  addWrapper(
+    (
+      render,
+      {
+        blueStripes,
+        generateNewStripe,
+        removeBlueStripe,
+        setRef,
+        onFinishedLoading,
+      },
+    ) => (
+      <div css={styles.container}>
+        <svg
+          height={CIRCLE_WIDTH}
+          width={CIRCLE_WIDTH}
+          viewBox={`0 0 ${CIRCLE_WIDTH} ${CIRCLE_WIDTH}`}
+        >
+          <defs>
+            <clipPath id={INNER_CIRClE_CLIP_PATH_ID}>
+              <circle
+                cx={CIRCLE_WIDTH / 2}
+                cy={CIRCLE_WIDTH / 2}
+                r={INNER_CIRCLE_WIDTH / 2}
+              />
+            </clipPath>
+          </defs>
+          <circle
+            cx={CIRCLE_WIDTH / 2}
+            cy={CIRCLE_WIDTH / 2}
+            r={CIRCLE_WIDTH / 2}
+            fill={colors.white}
+          />
+          <g
+            clipPath={`url(#${INNER_CIRClE_CLIP_PATH_ID})`}
+            data-svg-origin={`${CIRCLE_RADIUS} ${CIRCLE_RADIUS}`}
+            ref={setRef('circleContents')}
+          >
+            {blueStripes.map((blueStripeSpec) => (
+              <BlueStripe
+                {...blueStripeSpec}
+                generateNewStripe={generateNewStripe}
+                removeSelf={() => {
+                  removeBlueStripe(blueStripeSpec)
+                }}
+                key={`${blueStripeSpec.startPosition}-${blueStripeSpec.endPosition}`}
+              />
+            ))}
+          </g>
+        </svg>
+        <Loading onFinished={onFinishedLoading} />
+        {render()}
+      </div>
+    ),
+  ),
+  branch(({isLoading}) => isLoading, renderNothing()),
+  () => <LetsGoButton onClick={() => {}} />,
 )
 
 export default App
