@@ -9,6 +9,7 @@ import {
 import {delay, random} from 'lodash'
 import {Transition} from 'react-transition-group'
 import gsap from 'gsap'
+import {addExtendedHandlers} from 'ad-hok-utils'
 
 import {makeStyles} from 'utils/style'
 import {colors, atOpacity} from 'utils/colors'
@@ -21,23 +22,49 @@ interface Props {
 const Loading: FC<Props> = flowMax(
   addDisplayName('Loading'),
   addRenderingDelay(1000),
-  addWrapper((render) => (
+  addStateHandlers(
+    {
+      isShowing: true,
+    },
+    {
+      markNotShowing: () => () => ({
+        isShowing: false,
+      }),
+    },
+  ),
+  addWrapper((render, {isShowing}) => (
     <Transition
-      in
+      in={isShowing}
       mountOnEnter
+      unmountOnExit
       appear
       addEndListener={(node, done) => {
-        gsap.from(node, {
-          duration: 0.3,
-          opacity: 0,
-          scale: 0.9,
-          onComplete: done,
-        })
+        if (isShowing) {
+          gsap.from(node, {
+            duration: 0.3,
+            opacity: 0,
+            scale: 0.9,
+            onComplete: done,
+          })
+        } else {
+          gsap.to(node, {
+            duration: 0.5,
+            opacity: 0,
+            scale: 0.7,
+            onComplete: done,
+            delay: 0.2,
+          })
+        }
       }}
     >
       {render()}
     </Transition>
   )),
+  addExtendedHandlers({
+    onFinished: ({markNotShowing}) => () => {
+      markNotShowing()
+    },
+  }),
   addStateHandlers(
     {
       percent: 0,

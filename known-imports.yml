@@ -295,6 +295,7 @@ imports:
   addEffectOnMount: ad-hok-utils
   addLayoutEffectOnMount: ad-hok-utils
   cleanupProps: ad-hok-utils
+  addExtendedHandlers: ad-hok-utils
   colorUtil:
     module: color
     default: true
