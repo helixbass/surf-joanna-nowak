@@ -6,6 +6,7 @@ import gsap from 'gsap'
 import CenteredContainer from 'components/CenteredContainer'
 import {makeStyles} from 'utils/style'
 import {colors} from 'utils/colors'
+import addRenderingDelay from 'utils/addRenderingDelay'
 
 interface Props {
   onClick: () => void
@@ -13,6 +14,7 @@ interface Props {
 
 const LetsGoButton: FC<Props> = flowMax(
   addDisplayName('LetsGoButton'),
+  addRenderingDelay(200),
   addWrapper((render) => (
     <Transition
       in
@@ -20,7 +22,7 @@ const LetsGoButton: FC<Props> = flowMax(
       appear
       addEndListener={(node, done) => {
         gsap.from(node, {
-          duration: 0.7,
+          duration: 0.9,
           opacity: 0,
           scale: 0.8,
           onComplete: done,
