@@ -1,14 +1,16 @@
 import {
-  UnchangedProps,
   flowMax,
   addStateHandlers,
   branch,
   renderNothing,
+  CurriedUnchangedProps,
 } from 'ad-hok'
 import {addEffectOnMount, cleanupProps} from 'ad-hok-utils'
 import {delay} from 'lodash'
 
-type AddRenderingDelayType = <TProps>(delay: number) => UnchangedProps<TProps>
+type AddRenderingDelayType = <TProps>(
+  delay: number,
+) => CurriedUnchangedProps<TProps>
 
 const addRenderingDelay: AddRenderingDelayType = (delayMs) =>
   flowMax(

@@ -1,4 +1,5 @@
-export const CIRCLE_WIDTH = 400
+export const CIRCLE_WIDTH = 437.5
+export const CIRCLE_WIDTH_PX = 400
 export const CIRCLE_RADIUS = CIRCLE_WIDTH * 0.5
 export const INNER_CIRClE_CLIP_PATH_ID = 'inner-circle-clip-path'
 export const INNER_CIRCLE_PADDING_PER_SIDE = CIRCLE_WIDTH * 0.068
